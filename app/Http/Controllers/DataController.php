@@ -3,39 +3,41 @@
 namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Data;
 class DataController extends Controller
 {
     public function datadb(Request $request) {
-        $data = $request->all();
-        // if ($data['tabla'] == 'tabla_base_a') {
-        //     $data['origen'] = 'EL ORIGIEN DE LOS DATOS ES tabla_base_a';
-        //     $nuevoRegistro = new Data();
-        //     $nuevoRegistro->procedencia = 'Recibido de la BD a través de la API';
-        //     $nuevoRegistro->tabla = $request->tabla;
-        //     $nuevoRegistro->valor = $request->texto;
-        //     $nuevoRegistro->save();
-        // } else {
-        //     $data['origen'] = 'LA DATA PROVIENE DESDE OTRA FUENTE';
-        // }
+        info($request->all());
         switch ($request->tabla) {
             case 'tabla_base_a':
+                info(1);
                 $url='http://127.0.0.1:5000';
                 $envio = ['texto' => $request->texto];
                 break;
             case 'tabla_base_c':
+                info(2);
                 $url = 'http://127.0.0.1:5001';
-                $envio = ['texto' => $request->campo1];
+                $envio = ['campo1' => $request->campo1, 'campo2' => $request->campo2];
                 break;
         }
-        // $dato = ['texto' => $request->texto];
-        // $response = Http::post('http://127.0.0.1:5000', $dato);
         $response = Http::post($url, $envio);
         info($response);
-        // info($request->all());
-        // $response = Http::post("http://127.0.0.1:5000", [$data->texto]);
-        // return response()->json(200);
-        // return response()->json(['mensaje' => 'Se ha recibido el dato'], 200);
         return response()->json(['mensaje' => 1], 200);
-    }    
+
+    }
+    public function rec_send_subscriptions(Request $request) {
+        info($request->all());
+        $tabla = $request->tabla;
+        $urls = DB::table('suscriptions')
+                    ->where('table', $tabla)
+                    ->pluck('url');
+        info($urls);
+        foreach ($urls as $url) {
+            $envio = $request->except('tabla');
+            $response = Http::post($url, $envio);
+            info($response);
+        }    
+        return response()->json(['mensaje' => 1], 200);       
+    }
 }

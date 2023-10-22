@@ -13,7 +13,8 @@ use App\Http\Controllers\DataController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::post('/post', [DataController::class, 'datadb']);
+Route::post('/postdb', [DataController::class, 'datadb']);
+Route::post('/post', [DataController::class, 'rec_send_subscriptions']);
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
